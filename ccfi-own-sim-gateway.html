@@ -3,183 +3,590 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>CCFI Own SIM Gateway</title>
+    <title>CCFI SMS Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
       :root {
-        color-scheme: light;
-        --bg: #f5f7fb;
-        --panel: #ffffff;
-        --line: #dbe3ef;
-        --text: #172033;
-        --muted: #667085;
-        --primary: #0f5bd7;
-        --primary-dark: #0b48ad;
-        --ok: #047857;
-        --fail: #b42318;
+        color-scheme: dark;
+        --bg: #050a14;
+        --bg-soft: #08111f;
+        --panel: #0b1423;
+        --panel-strong: #111b2d;
+        --line: #1f2d44;
+        --line-soft: #17243a;
+        --text: #f7fbff;
+        --muted: #9fb2cc;
+        --subtle: #6f829d;
+        --primary: #7dd3fc;
+        --primary-strong: #38bdf8;
+        --accent: #f8c15c;
+        --good: #22c55e;
+        --warn: #f59e0b;
+        --bad: #ef4444;
+        --bad-bg: #7f1d1d;
+        --good-bg: #12351f;
+        --shadow: 0 22px 70px rgba(0, 0, 0, 0.32);
       }
 
       * {
         box-sizing: border-box;
       }
 
+      html,
+      body {
+        min-height: 100%;
+      }
+
       body {
         margin: 0;
-        background: var(--bg);
+        background:
+          radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 30rem),
+          linear-gradient(135deg, #050a14 0%, #08111f 46%, #050816 100%);
         color: var(--text);
         font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       }
 
-      header {
-        display: flex;
-        justify-content: space-between;
-        gap: 16px;
-        align-items: center;
-        border-bottom: 1px solid var(--line);
-        background: var(--panel);
-        padding: 18px clamp(18px, 4vw, 42px);
-      }
-
-      h1,
-      h2 {
-        margin: 0;
-        line-height: 1.1;
-      }
-
-      h1 {
-        font-size: clamp(1.45rem, 3vw, 2.2rem);
-      }
-
-      main {
-        display: grid;
-        width: min(1120px, 100%);
-        margin: 0 auto;
-        gap: 18px;
-        padding: clamp(18px, 4vw, 42px);
-      }
-
-      .grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 18px;
-      }
-
-      section {
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        background: var(--panel);
-        padding: 18px;
-        box-shadow: 0 12px 30px rgba(15, 35, 70, 0.06);
-      }
-
-      label {
-        display: grid;
-        gap: 7px;
-        margin-top: 13px;
-        color: #344054;
-        font-size: 0.92rem;
-        font-weight: 700;
-      }
-
+      button,
       input,
+      select,
       textarea {
-        width: 100%;
-        border: 1px solid #c8d3e1;
-        border-radius: 7px;
-        padding: 11px 12px;
-        color: var(--text);
         font: inherit;
-      }
-
-      textarea {
-        min-height: 124px;
-        resize: vertical;
       }
 
       button {
+        align-items: center;
         border: 0;
-        border-radius: 7px;
-        background: var(--primary);
-        color: #fff;
+        border-radius: 8px;
         cursor: pointer;
-        font: inherit;
-        font-weight: 800;
-        padding: 11px 14px;
+        display: inline-flex;
+        gap: 8px;
+        justify-content: center;
+        min-height: 42px;
+        padding: 10px 14px;
+        transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease, transform 0.16s ease;
       }
 
       button:hover {
-        background: var(--primary-dark);
+        transform: translateY(-1px);
       }
 
-      .secondary {
-        border: 1px solid #c8d3e1;
-        background: #fff;
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+        transform: none;
+      }
+
+      input,
+      select,
+      textarea {
+        background: #07101e;
+        border: 1px solid var(--line);
+        border-radius: 8px;
         color: var(--text);
+        outline: none;
+        padding: 11px 12px;
+        width: 100%;
       }
 
-      .secondary:hover {
-        background: #eef4ff;
+      input:focus,
+      select:focus,
+      textarea:focus {
+        border-color: var(--primary-strong);
+        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.14);
       }
 
-      .actions {
+      textarea {
+        min-height: 128px;
+        resize: vertical;
+      }
+
+      label {
+        color: var(--muted);
+        display: grid;
+        font-size: 0.88rem;
+        font-weight: 700;
+        gap: 8px;
+      }
+
+      .app {
+        display: grid;
+        grid-template-columns: 280px minmax(0, 1fr);
+        min-height: 100vh;
+      }
+
+      .sidebar {
+        background: rgba(5, 10, 20, 0.9);
+        border-right: 1px solid var(--line);
         display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-top: 16px;
+        flex-direction: column;
+        gap: 18px;
+        padding: 24px 12px;
+      }
+
+      .brand {
+        padding: 6px 12px 18px;
+      }
+
+      .brand h1 {
+        font-size: 1.38rem;
+        letter-spacing: 0;
+        margin: 0;
+      }
+
+      .brand p {
+        color: var(--muted);
+        margin: 8px 0 0;
+      }
+
+      .nav {
+        display: grid;
+        gap: 8px;
+      }
+
+      .nav button {
+        background: transparent;
+        color: #bad0ec;
+        justify-content: flex-start;
+        min-height: 54px;
+        padding: 0 16px;
+        text-align: left;
+        width: 100%;
+      }
+
+      .nav button.active,
+      .nav button:hover {
+        background: var(--panel-strong);
+        color: #fff;
+      }
+
+      .nav-mark {
+        align-items: center;
+        border: 1px solid #33445e;
+        border-radius: 7px;
+        color: var(--primary);
+        display: inline-flex;
+        font-size: 0.78rem;
+        font-weight: 900;
+        height: 24px;
+        justify-content: center;
+        width: 28px;
+      }
+
+      .sidebar-footer {
+        border-top: 1px solid var(--line);
+        color: var(--subtle);
+        font-size: 0.86rem;
+        margin-top: auto;
+        padding: 18px 12px 0;
+      }
+
+      .main {
+        min-width: 0;
+        padding: clamp(20px, 3vw, 40px);
+      }
+
+      .topbar {
+        align-items: center;
+        display: flex;
+        gap: 16px;
+        justify-content: space-between;
+        margin-bottom: 26px;
+      }
+
+      .eyebrow {
+        color: var(--primary);
+        font-size: 0.84rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        margin: 0 0 8px;
+        text-transform: uppercase;
+      }
+
+      h2 {
+        font-size: clamp(2rem, 4vw, 3.15rem);
+        line-height: 1;
+        margin: 0;
+      }
+
+      h3 {
+        font-size: 1.2rem;
+        margin: 0;
+      }
+
+      p {
+        line-height: 1.5;
       }
 
       .muted {
         color: var(--muted);
       }
 
-      .status {
-        margin-top: 13px;
-        border-radius: 7px;
+      .primary-button {
         background: #f8fafc;
+        color: #06101f;
+        font-weight: 900;
+      }
+
+      .primary-button:hover {
+        background: #dff5ff;
+      }
+
+      .blue-button {
+        background: var(--primary-strong);
+        color: #04111f;
+        font-weight: 900;
+      }
+
+      .blue-button:hover {
+        background: var(--primary);
+      }
+
+      .danger-button {
+        background: var(--bad-bg);
+        color: #fff;
+        font-weight: 900;
+      }
+
+      .danger-button:hover {
+        background: #991b1b;
+      }
+
+      .ghost-button {
+        background: transparent;
+        border: 1px solid var(--line);
+        color: var(--text);
+        font-weight: 800;
+      }
+
+      .ghost-button:hover {
+        background: var(--panel-strong);
+      }
+
+      .login {
+        align-items: center;
+        display: grid;
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .login-card {
+        background: rgba(11, 20, 35, 0.96);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        box-shadow: var(--shadow);
+        display: grid;
+        gap: 18px;
+        margin: 0 auto;
+        max-width: 440px;
+        padding: 28px;
+        width: 100%;
+      }
+
+      .login-card h1 {
+        font-size: 2rem;
+        margin: 0;
+      }
+
+      .content-view {
+        display: none;
+      }
+
+      .content-view.active {
+        display: block;
+      }
+
+      .dashboard-grid {
+        display: grid;
+        gap: 28px;
+        grid-template-columns: minmax(0, 1.8fr) minmax(330px, 0.95fr);
+      }
+
+      .stats-grid {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        margin-bottom: 28px;
+      }
+
+      .panel,
+      .stat-card,
+      .activity-panel {
+        background: rgba(8, 17, 31, 0.88);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        box-shadow: var(--shadow);
+      }
+
+      .stat-card {
+        min-height: 156px;
+        padding: 24px;
+      }
+
+      .stat-card .label {
         color: var(--muted);
-        min-height: 44px;
-        padding: 11px 12px;
-        white-space: pre-wrap;
+        font-weight: 800;
+        margin-bottom: 22px;
       }
 
-      .status.ok {
-        background: #ecfdf3;
-        color: var(--ok);
+      .stat-card .value {
+        font-size: 2.05rem;
+        font-weight: 950;
+        line-height: 1;
       }
 
-      .status.fail {
-        background: #fef3f2;
-        color: var(--fail);
+      .stat-card .small {
+        color: var(--muted);
+        margin-top: 8px;
       }
 
-      .wide {
+      .panel {
+        padding: 24px;
+      }
+
+      .panel-header {
+        align-items: flex-start;
+        display: flex;
+        gap: 16px;
+        justify-content: space-between;
+        margin-bottom: 18px;
+      }
+
+      .form-grid {
+        display: grid;
+        gap: 14px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .span-2 {
         grid-column: 1 / -1;
       }
 
-      @media (max-width: 760px) {
-        header {
-          align-items: flex-start;
-          flex-direction: column;
+      .action-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      .status-box {
+        background: #06101f;
+        border: 1px solid var(--line-soft);
+        border-radius: 8px;
+        color: var(--muted);
+        margin-top: 16px;
+        min-height: 48px;
+        overflow-wrap: anywhere;
+        padding: 12px;
+        white-space: pre-wrap;
+      }
+
+      .status-box.ok {
+        background: rgba(34, 197, 94, 0.08);
+        border-color: rgba(34, 197, 94, 0.36);
+        color: #a7f3d0;
+      }
+
+      .status-box.fail {
+        background: rgba(239, 68, 68, 0.08);
+        border-color: rgba(239, 68, 68, 0.34);
+        color: #fecaca;
+      }
+
+      .activity-panel {
+        max-height: 690px;
+        min-height: 420px;
+        overflow: hidden;
+      }
+
+      .activity-head {
+        padding: 26px 28px 18px;
+      }
+
+      .activity-list {
+        border-top: 1px solid var(--line);
+        max-height: 560px;
+        overflow: auto;
+      }
+
+      .activity-item {
+        align-items: center;
+        border-bottom: 1px solid var(--line-soft);
+        display: grid;
+        gap: 14px;
+        grid-template-columns: 14px minmax(0, 1fr) auto;
+        padding: 18px 24px;
+      }
+
+      .dot {
+        background: var(--subtle);
+        border-radius: 999px;
+        height: 10px;
+        width: 10px;
+      }
+
+      .activity-title {
+        font-weight: 900;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .activity-meta {
+        color: var(--muted);
+        margin-top: 4px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .pill {
+        border-radius: 999px;
+        display: inline-flex;
+        font-size: 0.82rem;
+        font-weight: 900;
+        justify-content: center;
+        min-width: 86px;
+        padding: 7px 12px;
+      }
+
+      .pill.good {
+        background: #ecfdf5;
+        color: #052e16;
+      }
+
+      .pill.bad {
+        background: var(--bad-bg);
+        color: #fff;
+      }
+
+      .pill.warn {
+        background: #4d3310;
+        color: #ffedd5;
+      }
+
+      .health-line {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      .health-badge {
+        background: var(--panel-strong);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: var(--muted);
+        font-weight: 800;
+        padding: 7px 11px;
+      }
+
+      .health-badge.good {
+        color: #a7f3d0;
+      }
+
+      .health-badge.bad {
+        color: #fecaca;
+      }
+
+      .table {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .table-row {
+        align-items: center;
+        border-bottom: 1px solid var(--line-soft);
+        display: grid;
+        gap: 14px;
+        grid-template-columns: 1.1fr 1fr 1fr auto;
+        padding: 14px 16px;
+      }
+
+      .table-row:last-child {
+        border-bottom: 0;
+      }
+
+      .table-head {
+        background: var(--panel-strong);
+        color: var(--muted);
+        font-size: 0.82rem;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+
+      .empty-state {
+        align-items: center;
+        border: 1px dashed #26364f;
+        border-radius: 8px;
+        color: var(--muted);
+        display: grid;
+        min-height: 180px;
+        padding: 20px;
+        text-align: center;
+      }
+
+      .settings-grid {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      code {
+        background: #050a14;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        color: #e0f2fe;
+        display: inline-block;
+        margin: 4px 0;
+        padding: 4px 7px;
+      }
+
+      @media (max-width: 1180px) {
+        .dashboard-grid,
+        .stats-grid,
+        .settings-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 820px) {
+        .app {
+          grid-template-columns: 1fr;
         }
 
-        .grid {
+        .sidebar {
+          border-bottom: 1px solid var(--line);
+          border-right: 0;
+          position: static;
+        }
+
+        .nav {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .form-grid,
+        .table-row {
           grid-template-columns: 1fr;
+        }
+
+        .topbar,
+        .panel-header {
+          align-items: stretch;
+          flex-direction: column;
         }
       }
     </style>
   </head>
   <body>
-    <header>
-      <div>
-        <h1>CCFI Own SIM Gateway</h1>
-        <p class="muted">Test SMS and click-to-call through your own SIM gateway.</p>
-      </div>
-      <button class="secondary" type="button" onclick="signOut()">Sign out</button>
-    </header>
-
-    <main>
-      <section id="loginPanel">
-        <h2>Login</h2>
+    <section id="loginPanel" class="login">
+      <div class="login-card">
+        <div>
+          <p class="eyebrow">CCFI Own SIM Gateway</p>
+          <h1>SMS Dashboard</h1>
+          <p class="muted">Sign in to call or text authorized clients through your SIM gateway phone.</p>
+        </div>
         <label>
           Email
           <input id="email" type="email" autocomplete="username" />
@@ -188,75 +595,385 @@
           Password
           <input id="password" type="password" autocomplete="current-password" />
         </label>
-        <div class="actions">
-          <button type="button" onclick="signIn()">Login</button>
-        </div>
-        <div id="loginStatus" class="status"></div>
-      </section>
-
-      <div id="gatewayPanel" class="grid" hidden>
-        <section class="wide">
-          <h2>Gateway Health</h2>
-          <p class="muted">Checks the Supabase function and your own SIM gateway server.</p>
-          <div class="actions">
-            <button type="button" onclick="testGateway()">Test Gateway</button>
-          </div>
-          <div id="healthStatus" class="status"></div>
-        </section>
-
-        <section>
-          <h2>Send SMS</h2>
-          <label>
-            PN / Account
-            <input id="smsPn" placeholder="Optional account PN" />
-          </label>
-          <label>
-            Recipient Number
-            <input id="smsPhone" type="tel" placeholder="09XXXXXXXXX" />
-          </label>
-          <label>
-            Message
-            <textarea id="smsMessage" maxlength="480" placeholder="Type the message here"></textarea>
-          </label>
-          <div class="actions">
-            <button type="button" onclick="sendSms()">Send SMS</button>
-          </div>
-          <div id="smsStatus" class="status"></div>
-        </section>
-
-        <section>
-          <h2>Start Call</h2>
-          <p class="muted">This starts a cellular call on the SIM gateway phone. Voice audio stays on that phone.</p>
-          <label>
-            PN / Account
-            <input id="callPn" placeholder="Optional account PN" />
-          </label>
-          <label>
-            Recipient Number
-            <input id="callPhone" type="tel" placeholder="09XXXXXXXXX" />
-          </label>
-          <div class="actions">
-            <button type="button" onclick="startCall()">Start Call</button>
-          </div>
-          <div id="callStatus" class="status"></div>
-        </section>
+        <button class="primary-button" type="button" onclick="signIn()">Sign in</button>
+        <div id="loginStatus" class="status-box"></div>
       </div>
-    </main>
+    </section>
+
+    <section id="gatewayPanel" class="app" hidden>
+      <aside class="sidebar">
+        <div class="brand">
+          <h1>SMS Dashboard</h1>
+          <p>CCFI client contact center</p>
+        </div>
+        <nav class="nav" aria-label="Main">
+          <button class="active" type="button" data-view-button="dashboard" onclick="showView('dashboard')">
+            <span class="nav-mark">DB</span>
+            Dashboard
+          </button>
+          <button type="button" data-view-button="clients" onclick="showView('clients')">
+            <span class="nav-mark">CL</span>
+            Clients
+          </button>
+          <button type="button" data-view-button="messages" onclick="showView('messages')">
+            <span class="nav-mark">MS</span>
+            Messages
+          </button>
+          <button type="button" data-view-button="devices" onclick="showView('devices')">
+            <span class="nav-mark">DV</span>
+            Devices
+          </button>
+          <button type="button" data-view-button="settings" onclick="showView('settings')">
+            <span class="nav-mark">ST</span>
+            Settings
+          </button>
+        </nav>
+        <div class="sidebar-footer">
+          <strong id="sessionEmail">Signed in</strong>
+          <p>Calls and texts run through your connected Android SIM.</p>
+        </div>
+      </aside>
+
+      <main class="main">
+        <div class="topbar">
+          <div>
+            <p class="eyebrow">Gateway Console</p>
+            <h2>Dashboard</h2>
+            <p class="muted" id="welcomeLine">Welcome back.</p>
+          </div>
+          <div class="action-row">
+            <button class="ghost-button" type="button" onclick="testGateway()">Check Gateway</button>
+            <button class="ghost-button" type="button" onclick="signOut()">Sign out</button>
+          </div>
+        </div>
+
+        <section id="view-dashboard" class="content-view active">
+          <div class="stats-grid">
+            <article class="stat-card">
+              <div class="label">Gateway Status</div>
+              <div class="value" id="statStatus">--</div>
+              <div class="small" id="statStatusNote">Run a health check</div>
+            </article>
+            <article class="stat-card">
+              <div class="label">Messages Sent</div>
+              <div class="value" id="statSms">0</div>
+              <div class="small">Browser activity log</div>
+            </article>
+            <article class="stat-card">
+              <div class="label">Calls Started</div>
+              <div class="value" id="statCalls">0</div>
+              <div class="small">Dial requests submitted</div>
+            </article>
+            <article class="stat-card">
+              <div class="label">Pending / Failed</div>
+              <div class="value" id="statFailed">0</div>
+              <div class="small">Needs review</div>
+            </article>
+          </div>
+
+          <div class="dashboard-grid">
+            <div>
+              <section class="panel">
+                <div class="panel-header">
+                  <div>
+                    <h3>Client Action</h3>
+                    <p class="muted">Send one message or start one call for the selected client.</p>
+                  </div>
+                  <button class="ghost-button" type="button" onclick="fillReminderTemplate()">Reminder Template</button>
+                </div>
+
+                <div class="form-grid">
+                  <label>
+                    PN / Account
+                    <input id="clientPn" placeholder="Example: TEST-001" />
+                  </label>
+                  <label>
+                    Client Name
+                    <input id="clientName" placeholder="Borrower name" />
+                  </label>
+                  <label>
+                    Mobile Number
+                    <input id="clientPhone" type="tel" placeholder="09XXXXXXXXX" />
+                  </label>
+                  <label>
+                    Action Type
+                    <select id="actionType">
+                      <option value="sms">Send SMS</option>
+                      <option value="call">Start Call</option>
+                    </select>
+                  </label>
+                  <label class="span-2">
+                    Message
+                    <textarea id="clientMessage" maxlength="480" placeholder="Type the message for this client"></textarea>
+                  </label>
+                </div>
+
+                <div class="action-row">
+                  <button class="blue-button" type="button" onclick="sendSms()">Send SMS</button>
+                  <button class="primary-button" type="button" onclick="startCall()">Start Call</button>
+                  <button class="ghost-button" type="button" onclick="clearClientForm()">Clear</button>
+                </div>
+                <div id="actionStatus" class="status-box"></div>
+              </section>
+
+              <section class="panel" style="margin-top: 24px">
+                <div class="panel-header">
+                  <div>
+                    <h3>Gateway Health</h3>
+                    <p class="muted">Checks Supabase and the phone gateway server.</p>
+                  </div>
+                  <button class="ghost-button" type="button" onclick="testGateway()">Refresh</button>
+                </div>
+                <div class="health-line">
+                  <span id="healthReachable" class="health-badge">Unknown</span>
+                  <span id="healthDryRun" class="health-badge">Dry run: unknown</span>
+                  <span id="healthSms" class="health-badge">SMS: unknown</span>
+                  <span id="healthCall" class="health-badge">Call: unknown</span>
+                </div>
+                <div id="healthStatus" class="status-box"></div>
+              </section>
+            </div>
+
+            <aside class="activity-panel">
+              <div class="activity-head">
+                <div class="panel-header" style="margin-bottom: 0">
+                  <div>
+                    <h3>Activity</h3>
+                    <p class="muted">Live client contact events</p>
+                  </div>
+                  <button class="ghost-button" type="button" onclick="clearActivity()">Clear</button>
+                </div>
+              </div>
+              <div id="activityList" class="activity-list"></div>
+            </aside>
+          </div>
+        </section>
+
+        <section id="view-clients" class="content-view">
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h3>Clients</h3>
+                <p class="muted">Quick-load common client test entries, then send from the dashboard.</p>
+              </div>
+            </div>
+            <div class="table">
+              <div class="table-row table-head">
+                <div>PN</div>
+                <div>Name</div>
+                <div>Mobile</div>
+                <div>Action</div>
+              </div>
+              <div class="table-row">
+                <div>TEST-001</div>
+                <div>Gateway Test</div>
+                <div>09295730531</div>
+                <button class="ghost-button" type="button" onclick="loadQuickClient('TEST-001','Gateway Test','09295730531')">Load</button>
+              </div>
+              <div class="table-row">
+                <div>TEST-002</div>
+                <div>Office Check</div>
+                <div>09171234567</div>
+                <button class="ghost-button" type="button" onclick="loadQuickClient('TEST-002','Office Check','09171234567')">Load</button>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <section id="view-messages" class="content-view">
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h3>Messages</h3>
+                <p class="muted">Recent SMS attempts saved in this browser.</p>
+              </div>
+            </div>
+            <div id="messageList" class="table"></div>
+          </section>
+        </section>
+
+        <section id="view-devices" class="content-view">
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h3>Devices</h3>
+                <p class="muted">The Android phone running Termux is your current gateway device.</p>
+              </div>
+              <button class="ghost-button" type="button" onclick="testGateway()">Check Now</button>
+            </div>
+            <div class="table">
+              <div class="table-row table-head">
+                <div>Device</div>
+                <div>Status</div>
+                <div>Mode</div>
+                <div>Limit</div>
+              </div>
+              <div class="table-row">
+                <div>Own SIM Gateway Phone</div>
+                <div id="deviceStatus">Unknown</div>
+                <div id="deviceMode">Unknown</div>
+                <div id="deviceLimit">Unknown</div>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <section id="view-settings" class="content-view">
+          <div class="settings-grid">
+            <section class="panel">
+              <h3>Supabase Settings</h3>
+              <p class="muted">Make sure the Edge Function has these secrets after your tunnel URL is ready.</p>
+              <p><code>OWN_SIM_GATEWAY_URL</code></p>
+              <p><code>OWN_SIM_GATEWAY_TOKEN</code></p>
+            </section>
+            <section class="panel">
+              <h3>Phone Gateway</h3>
+              <p class="muted">Keep Termux running with the Node server and your tunnel while using this dashboard.</p>
+              <p><code>node server.js</code></p>
+              <p><code>cloudflared tunnel --url http://localhost:8787</code></p>
+            </section>
+          </div>
+        </section>
+      </main>
+    </section>
 
     <script>
       const SUPABASE_URL = "https://kreyfgipofhxwpcwvkuz.supabase.co";
       const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_tlyDDbuqPa86wOL5erFhpg_bvjuM0JO";
       const GATEWAY_FUNCTION = "sim-gateway";
+      const STORAGE_KEY = "ccfi_sms_dashboard_state";
       const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+      const state = loadState();
+
+      function loadState() {
+        try {
+          return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { events: [] };
+        } catch {
+          return { events: [] };
+        }
+      }
+
+      function saveState() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      }
 
       function setStatus(id, message, ok = null) {
         const element = document.getElementById(id);
+        if (!element) return;
         element.textContent = typeof message === "string" ? message : JSON.stringify(message, null, 2);
-        element.className = "status" + (ok === true ? " ok" : ok === false ? " fail" : "");
+        element.className = "status-box" + (ok === true ? " ok" : ok === false ? " fail" : "");
+      }
+
+      function normalizePhone(value) {
+        const cleaned = String(value || "").trim().replace(/[^\d+]/g, "");
+        if (!cleaned) return "";
+        if (cleaned.startsWith("+")) return cleaned;
+        if (cleaned.startsWith("09") && cleaned.length === 11) return `+63${cleaned.slice(1)}`;
+        if (cleaned.startsWith("9") && cleaned.length === 10) return `+63${cleaned}`;
+        if (cleaned.startsWith("63") && cleaned.length === 12) return `+${cleaned}`;
+        return cleaned;
+      }
+
+      function renderStats() {
+        const smsOk = state.events.filter((event) => event.type === "sms" && event.ok).length;
+        const callOk = state.events.filter((event) => event.type === "call" && event.ok).length;
+        const failed = state.events.filter((event) => !event.ok).length;
+        document.getElementById("statSms").textContent = smsOk;
+        document.getElementById("statCalls").textContent = callOk;
+        document.getElementById("statFailed").textContent = failed;
+      }
+
+      function addActivity(event) {
+        state.events.unshift({
+          id: Date.now().toString(36),
+          at: new Date().toISOString(),
+          ...event,
+        });
+        state.events = state.events.slice(0, 80);
+        saveState();
+        renderActivity();
+        renderMessages();
+        renderStats();
+      }
+
+      function renderActivity() {
+        const list = document.getElementById("activityList");
+        if (!list) return;
+        if (!state.events.length) {
+          list.innerHTML = '<div class="empty-state">No activity yet. Send a test SMS or check the gateway.</div>';
+          return;
+        }
+        list.innerHTML = state.events
+          .map((event) => {
+            const badgeClass = event.ok ? "good" : event.pending ? "warn" : "bad";
+            const badgeText = event.ok ? "Delivered" : event.pending ? "Pending" : "Failed";
+            const title = event.type === "call" ? `Call ${event.phoneNumber || ""}` : event.type === "health" ? "Gateway health" : `SMS ${event.phoneNumber || ""}`;
+            const meta = event.detail || event.messagePreview || event.error || "";
+            const time = new Date(event.at).toLocaleString();
+            return `
+              <article class="activity-item">
+                <span class="dot"></span>
+                <div>
+                  <div class="activity-title">${escapeHtml(title)}</div>
+                  <div class="activity-meta">${escapeHtml(meta)} - ${escapeHtml(time)}</div>
+                </div>
+                <span class="pill ${badgeClass}">${badgeText}</span>
+              </article>
+            `;
+          })
+          .join("");
+      }
+
+      function renderMessages() {
+        const list = document.getElementById("messageList");
+        if (!list) return;
+        const messages = state.events.filter((event) => event.type === "sms");
+        if (!messages.length) {
+          list.innerHTML = '<div class="empty-state">No sent messages saved in this browser yet.</div>';
+          return;
+        }
+        list.innerHTML = `
+          <div class="table-row table-head">
+            <div>Client</div>
+            <div>Phone</div>
+            <div>Preview</div>
+            <div>Status</div>
+          </div>
+          ${messages
+            .map(
+              (event) => `
+                <div class="table-row">
+                  <div>${escapeHtml(event.borrower || event.pn || "Client")}</div>
+                  <div>${escapeHtml(event.phoneNumber || "")}</div>
+                  <div>${escapeHtml(event.messagePreview || "")}</div>
+                  <span class="pill ${event.ok ? "good" : "bad"}">${event.ok ? "Delivered" : "Failed"}</span>
+                </div>
+              `,
+            )
+            .join("")}
+        `;
+      }
+
+      function clearActivity() {
+        state.events = [];
+        saveState();
+        renderActivity();
+        renderMessages();
+        renderStats();
+      }
+
+      function escapeHtml(value) {
+        return String(value || "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
       }
 
       async function signIn() {
-        setStatus("loginStatus", "Logging in...");
+        setStatus("loginStatus", "Signing in...");
         const email = document.getElementById("email").value.trim();
         const password = document.getElementById("password").value;
         const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
@@ -264,7 +981,7 @@
           setStatus("loginStatus", error.message, false);
           return;
         }
-        setStatus("loginStatus", "Logged in.", true);
+        setStatus("loginStatus", "Signed in.", true);
         await refreshSession();
       }
 
@@ -275,9 +992,18 @@
 
       async function refreshSession() {
         const { data } = await supabaseClient.auth.getSession();
-        const loggedIn = Boolean(data.session);
+        const session = data.session;
+        const loggedIn = Boolean(session);
         document.getElementById("loginPanel").hidden = loggedIn;
         document.getElementById("gatewayPanel").hidden = !loggedIn;
+        if (loggedIn) {
+          const email = session.user?.email || "Signed in";
+          document.getElementById("sessionEmail").textContent = email;
+          document.getElementById("welcomeLine").textContent = `Welcome back, ${email}`;
+          renderActivity();
+          renderMessages();
+          renderStats();
+        }
       }
 
       async function invokeGateway(payload, statusId) {
@@ -285,40 +1011,112 @@
         const { data, error } = await supabaseClient.functions.invoke(GATEWAY_FUNCTION, { body: payload });
         if (error) {
           setStatus(statusId, error.message || String(error), false);
-          return null;
+          return { ok: false, error: error.message || String(error) };
         }
         setStatus(statusId, data, Boolean(data?.ok));
-        return data;
+        return data || { ok: false, error: "Empty gateway response." };
       }
 
       async function testGateway() {
-        await invokeGateway({ mode: "health" }, "healthStatus");
+        const data = await invokeGateway({ mode: "health" }, "healthStatus");
+        const gateway = data?.gateway || {};
+        const ok = Boolean(data?.ok && gateway?.ok !== false);
+        document.getElementById("statStatus").textContent = ok ? "Online" : "Offline";
+        document.getElementById("statStatusNote").textContent = ok ? "Gateway reachable" : "Check tunnel and Termux";
+        document.getElementById("healthReachable").textContent = ok ? "Reachable" : "Not reachable";
+        document.getElementById("healthReachable").className = `health-badge ${ok ? "good" : "bad"}`;
+        document.getElementById("healthDryRun").textContent = `Dry run: ${gateway?.dryRun === true ? "on" : gateway?.dryRun === false ? "off" : "unknown"}`;
+        document.getElementById("healthSms").textContent = `SMS: ${gateway?.smsConfigured ? "configured" : "unknown"}`;
+        document.getElementById("healthCall").textContent = `Call: ${gateway?.callConfigured ? "configured" : "unknown"}`;
+        document.getElementById("deviceStatus").textContent = ok ? "Online" : "Offline";
+        document.getElementById("deviceMode").textContent = gateway?.dryRun === false ? "Live SIM" : gateway?.dryRun === true ? "Dry run" : "Unknown";
+        document.getElementById("deviceLimit").textContent = gateway?.rateLimitPerMinute ? `${gateway.rateLimitPerMinute}/min` : "Unknown";
+        addActivity({
+          type: "health",
+          ok,
+          detail: ok ? "Gateway health check succeeded" : data?.error || "Gateway health check failed",
+        });
+      }
+
+      function getClientPayload(requireMessage) {
+        const pn = document.getElementById("clientPn").value.trim();
+        const borrower = document.getElementById("clientName").value.trim();
+        const phoneNumber = normalizePhone(document.getElementById("clientPhone").value);
+        const message = document.getElementById("clientMessage").value.trim();
+
+        if (!phoneNumber) {
+          setStatus("actionStatus", "Recipient mobile number is required.", false);
+          return null;
+        }
+        if (requireMessage && !message) {
+          setStatus("actionStatus", "Message is required before sending SMS.", false);
+          return null;
+        }
+        return { pn, borrower, phoneNumber, message };
       }
 
       async function sendSms() {
-        await invokeGateway(
-          {
-            action: "sms",
-            pn: document.getElementById("smsPn").value.trim(),
-            phoneNumber: document.getElementById("smsPhone").value.trim(),
-            message: document.getElementById("smsMessage").value.trim(),
-          },
-          "smsStatus",
-        );
+        const payload = getClientPayload(true);
+        if (!payload) return;
+        const data = await invokeGateway({ action: "sms", ...payload }, "actionStatus");
+        addActivity({
+          type: "sms",
+          ok: Boolean(data?.ok),
+          pn: payload.pn,
+          borrower: payload.borrower,
+          phoneNumber: payload.phoneNumber,
+          messagePreview: payload.message.slice(0, 80),
+          error: data?.error || data?.details?.error || null,
+        });
       }
 
       async function startCall() {
-        await invokeGateway(
-          {
-            action: "call",
-            pn: document.getElementById("callPn").value.trim(),
-            phoneNumber: document.getElementById("callPhone").value.trim(),
-          },
-          "callStatus",
-        );
+        const payload = getClientPayload(false);
+        if (!payload) return;
+        const data = await invokeGateway({ action: "call", ...payload }, "actionStatus");
+        addActivity({
+          type: "call",
+          ok: Boolean(data?.ok),
+          pn: payload.pn,
+          borrower: payload.borrower,
+          phoneNumber: payload.phoneNumber,
+          detail: payload.borrower ? `Call started for ${payload.borrower}` : "Call request submitted",
+          error: data?.error || data?.details?.error || null,
+        });
+      }
+
+      function fillReminderTemplate() {
+        const name = document.getElementById("clientName").value.trim() || "Client";
+        document.getElementById("clientMessage").value = `Good day ${name}, this is Cebuan Cycle Financing Inc. Please contact us regarding your account. Thank you.`;
+        document.getElementById("actionType").value = "sms";
+      }
+
+      function clearClientForm() {
+        document.getElementById("clientPn").value = "";
+        document.getElementById("clientName").value = "";
+        document.getElementById("clientPhone").value = "";
+        document.getElementById("clientMessage").value = "";
+        setStatus("actionStatus", "");
+      }
+
+      function loadQuickClient(pn, name, phone) {
+        document.getElementById("clientPn").value = pn;
+        document.getElementById("clientName").value = name;
+        document.getElementById("clientPhone").value = phone;
+        showView("dashboard");
+      }
+
+      function showView(name) {
+        document.querySelectorAll(".content-view").forEach((view) => view.classList.remove("active"));
+        document.querySelectorAll("[data-view-button]").forEach((button) => button.classList.remove("active"));
+        document.getElementById(`view-${name}`).classList.add("active");
+        document.querySelector(`[data-view-button="${name}"]`).classList.add("active");
       }
 
       supabaseClient.auth.onAuthStateChange(refreshSession);
+      renderActivity();
+      renderMessages();
+      renderStats();
       refreshSession();
     </script>
   </body>
